@@ -1,6 +1,7 @@
 const APP_KEY='kodama_strength_live_v1';
 
 let state=load();
+let adminAuthorized=false;
 function makeId(){try{if(window.crypto&&typeof window.crypto.randomUUID==='function')return window.crypto.randomUUID()}catch(e){}return 'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12)}
 function blank(){return {id:makeId(),createdAt:new Date().toISOString(),status:'未入力',step:0,profile:{},bigfive:Array(50).fill(null),twenty:Array(20).fill(''),assets:{},current:{},submitted:false};}
 function normalizeState(value){
@@ -25,7 +26,7 @@ function render(){
   try{
     save();
     const s=state.active;
-    if(location.hash==='#admin')return renderAdmin();
+    if(location.hash==='#admin')return adminAuthorized?renderAdmin():renderAdminLogin();
     if(s.submitted)return renderResult();
     const pages=[intro,profile,bigIntro,...Array.from({length:5},(_,i)=>()=>bigPage(i)),twentyIntro,twentyPage,assetsPage,currentPage,review];
     const page=pages[s.step]||intro;
