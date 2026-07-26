@@ -27,9 +27,7 @@ function customerTokenFromUrl() {
 }
 
 function customerUrl(token) {
-  const url = new URL(location.href);
-  url.hash = '';
-  url.search = '';
+  const url = new URL('./', location.href);
   url.searchParams.set('token', token);
   return url.toString();
 }
