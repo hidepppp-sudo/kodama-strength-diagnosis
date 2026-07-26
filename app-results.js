@@ -14,5 +14,17 @@ async function issueAssessment(){const issueButton=document.getElementById('issu
 async function refreshAdminList(){setTimeout(()=>renderAdmin(),800)}
 async function showDetail(id){const d=document.getElementById('detail');d.innerHTML='<section class="card"><p>詳細を読み込んでいます。</p></section>';try{const row=await cloudRpc('admin_get_assessment',{p_token:adminToken,p_id:id});if(!row)return alert('データを取得できませんでした。');const c=normalizeActive(row.response_data||blank());const completed=row.status==='completed'&&c.bigfive.every(v=>Number.isInteger(v));const a=completed?aiSummary(c):null;const pct=completed?score(c).pct:null;d.innerHTML=`<section class="card"><h2>${esc(c.profile.name||`未入力顧客 #${row.client_number}`)}｜面談前アセスメント</h2><div class="grid2"><div><b>会社・屋号</b><p>${esc(c.profile.company||'—')}</p></div><div><b>事業内容</b><p>${esc(c.profile.business||'—')}</p></div></div>${completed?`<h3>大枠サマリー</h3><div class="notice">${esc(a.summary)}</div><p><b>商品化の現在地：</b>${esc(a.stage)}</p><h3>Big Five</h3><p>${Object.keys(pct).map(k=>`${traits[k]} ${pct[k]}`).join(' ／ ')}</p><h3>20答法・自己認識</h3><ol>${c.twenty.filter(Boolean).map(v=>`<li>${esc(v)}</li>`).join('')}</ol><h3>経験・実績の素材</h3>${assetQs.map(([k,q])=>`<details><summary>${esc(q)}</summary><p>${esc(c.assets[k]?.text||'未入力')}</p></details>`).join('')}<h3>注目ポイント</h3><ul>${a.points.map(v=>`<li>${esc(v)}</li>`).join('')}</ul><h3>面談で確認する質問候補</h3><ol>${a.questions.map(v=>`<li>${esc(v)}</li>`).join('')}</ol>`:'<div class="notice">この顧客はまだ回答を完了していません。</div>'}<h3>面談後の小玉所見</h3><textarea id="kodamaNote" placeholder="核となる強み、発揮条件、消耗条件、顧客候補、商品の方向性、次の行動を記録">${esc(row.admin_note||'')}</textarea><button id="saveNote">所見を保存</button></section>`;const saveButton=document.getElementById('saveNote'),note=document.getElementById('kodamaNote');saveButton.onclick=async()=>{saveButton.disabled=true;try{await cloudRpc('admin_save_note',{p_token:adminToken,p_id:id,p_note:note.value});saveButton.textContent='保存しました'}catch(e){alert(e.message)}finally{saveButton.disabled=false}}}catch(e){adminSessionFailed(e)}}
 async function adminLogout(){try{await cloudRpc('admin_logout',{p_token:adminToken})}catch(_){}adminToken='';adminAuthorized=false;sessionStorage.removeItem(ADMIN_KEY);renderAdminLogin()}
-function adminSessionFailed(e){if(/session|token|権限|invalid/i.test(e.message)){adminToken='';adminAuthorized=false;sessionStorage.removeItem(ADMIN_KEY);renderAdminLogin()}else app.innerHTML=`<section class="card"><h1>管理画面を読み込めませんでした</h1><p>${esc(e.message)}</p><button onclick="location.reload()">再読み込み</button></section>`}
+function adminSessionFailed(e){
+  const message=String(e&&e.message||e||'');
+  if(/session|token|権限|invalid|unauthorized|not authorized|forbidden|expired|jwt/i.test(message)){
+    adminToken='';
+    adminAuthorized=false;
+    sessionStorage.removeItem(ADMIN_KEY);
+    renderAdminLogin();
+    const error=document.getElementById('adminError');
+    if(error)error.textContent='ログインの有効期限が切れました。管理者パスワードを再入力してください。';
+    return;
+  }
+  app.innerHTML=`<section class="card"><h1>管理画面を読み込めませんでした</h1><p>${esc(message)}</p><button onclick="location.reload()">再読み込み</button></section>`;
+}
 initApp();
