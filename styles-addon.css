@@ -3,7 +3,17 @@
 .issued-card{border-color:#c8b06b;background:#fffdf7}
 button:disabled{opacity:.55;cursor:wait}
 .pdf-sheet{display:none}
-@media(max-width:700px){.cloud-state{margin-top:0;text-align:left}.issued-card input{font-size:12px}}
+
+.persona-site-brand{display:flex;align-items:center;gap:11px;min-width:0}
+.persona-header-logo{width:48px;height:48px;border-radius:12px;object-fit:contain;background:#fff;flex:0 0 auto}
+.persona-site-brand .brand{font-size:19px;line-height:1.05;letter-spacing:.01em}
+.persona-site-brand .service{font-size:12px;margin-top:4px;color:var(--muted)}
+.persona-hero-logo{display:block;width:118px;height:auto;margin:0 auto 18px;object-fit:contain}
+.persona-hero-subtitle{margin:-6px 0 18px;font-size:14px;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.analysis-copy-button{background:#132238;color:#fff;border-color:#132238}
+.analysis-export-dialog{position:fixed;z-index:9999;left:50%;top:50%;transform:translate(-50%,-50%);width:min(860px,calc(100vw - 28px));max-height:calc(100vh - 28px);margin:0!important;overflow:auto;box-shadow:0 24px 80px rgba(15,23,42,.28)}
+.analysis-export-dialog textarea{min-height:56vh;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.55}
+.analysis-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
 
 .admin-hero,.detail-head,.admin-list-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
 .admin-primary-actions,.admin-filters,.detail-actions,.row-actions,.url-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -27,11 +37,20 @@ button:disabled{opacity:.55;cursor:wait}
 .detail-card{scroll-margin-top:20px}
 .detail-actions{padding:12px 0 22px;border-bottom:1px solid #e2e8f0;margin-bottom:24px}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
 @media(max-width:860px){
   .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .admin-hero,.admin-list-head{display:block}
   .admin-primary-actions,.admin-filters{margin-top:16px}
   .admin-filters input{min-width:0;width:100%}
+}
+@media(max-width:700px){
+  .cloud-state{margin-top:0;text-align:left}
+  .issued-card input{font-size:12px}
+  .persona-header-logo{width:42px;height:42px}
+  .persona-site-brand .brand{font-size:17px}
+  .persona-site-brand .service{font-size:11px}
+  .persona-hero-logo{width:104px}
 }
 @media(max-width:520px){
   .admin-stats{gap:10px}
@@ -40,17 +59,23 @@ button:disabled{opacity:.55;cursor:wait}
   .admin-primary-actions>*{flex:1}
   .url-box{display:block}
   .url-box input,.url-box button{width:100%;margin-top:8px}
+  .detail-actions>*{width:100%}
+  .analysis-copy-button{order:-1}
 }
 
 @media print{
-  @page{size:A4 portrait;margin:5mm}
-  html,body{width:210mm!important;height:297mm!important;margin:0!important;padding:0!important;background:#fff!important;overflow:hidden!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4 portrait;margin:0}
+  html,body{width:210mm!important;height:296mm!important;min-height:0!important;margin:0!important;padding:0!important;background:#fff!important;overflow:hidden!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body>*:not(.pdf-sheet){display:none!important}
-  .pdf-sheet{display:grid!important;grid-template-rows:auto 68mm 1fr auto;width:200mm!important;height:287mm!important;margin:0!important;padding:4.5mm 5mm 3.5mm!important;background:#fff!important;color:#162033!important;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif!important;box-sizing:border-box!important;overflow:hidden!important;page-break-after:avoid!important;break-after:avoid-page!important}
-  .pdf-header{display:flex;align-items:flex-end;justify-content:space-between;gap:8mm;padding-bottom:2.5mm;border-bottom:1.2px solid #132238}
-  .pdf-kicker{font-size:6.7pt;font-weight:800;letter-spacing:.16em;color:#9b7a32}
-  .pdf-header h1{margin:1mm 0 0!important;font-size:16.5pt!important;line-height:1.05!important;color:#132238!important}
-  .pdf-person{text-align:right;line-height:1.25}
+  .pdf-sheet{display:grid!important;position:absolute!important;inset:0 auto auto 0!important;grid-template-rows:auto 68mm 1fr auto;width:210mm!important;height:296mm!important;min-height:0!important;margin:0!important;padding:5.5mm 6mm 4mm!important;background:#fff!important;color:#162033!important;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif!important;box-sizing:border-box!important;overflow:hidden!important;page-break-before:avoid!important;page-break-after:auto!important;break-before:avoid-page!important;break-after:auto!important}
+  .pdf-header{display:flex;align-items:center;justify-content:space-between;gap:7mm;padding-bottom:2.3mm;border-bottom:1.2px solid #132238;min-height:17mm}
+  .pdf-brand{display:flex;align-items:center;gap:3mm;min-width:0}
+  .pdf-logo-mark{width:14mm!important;height:14mm!important;object-fit:contain!important;border-radius:2mm}
+  .pdf-brand-text{min-width:0}
+  .pdf-kicker{font-size:8pt;font-weight:900;letter-spacing:.14em;color:#173d7a;line-height:1}
+  .pdf-subtitle{margin-top:.7mm;font-size:6.4pt;font-weight:700;letter-spacing:.08em;color:#64748b;line-height:1}
+  .pdf-header h1{margin:1.2mm 0 0!important;font-size:13pt!important;line-height:1.05!important;color:#132238!important}
+  .pdf-person{text-align:right;line-height:1.25;flex:0 0 auto}
   .pdf-person strong{display:block;font-size:11.5pt;color:#132238}
   .pdf-person span{display:block;margin-top:.8mm;font-size:7pt;color:#526174}
   .pdf-overview{display:grid;grid-template-columns:1.25fr .75fr;gap:4mm;align-items:center;padding:2mm 0 2.3mm;border-bottom:1px solid #cbd5e1;min-height:0}
@@ -67,7 +92,7 @@ button:disabled{opacity:.55;cursor:wait}
   .pdf-score-panel>p{margin:1.4mm 0 0!important;font-size:6.35pt!important;line-height:1.38!important;color:#526174}
   .pdf-trait-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr .78fr;gap:2.2mm;padding:2.5mm 0;min-height:0;overflow:hidden}
   .pdf-trait-card{display:flex;flex-direction:column;min-height:0;padding:2.1mm 2.3mm;border:1px solid #d3dae5;border-radius:2.4mm;background:#fff;overflow:hidden;break-inside:avoid!important;page-break-inside:avoid!important}
-  .pdf-trait-card:last-child{grid-column:1 / -1}
+  .pdf-trait-card:last-child{grid-column:1 / -1;padding-top:2mm;padding-bottom:2mm}
   .pdf-trait-head{display:flex;align-items:center;justify-content:space-between;gap:2mm;padding-bottom:1mm;border-bottom:1px solid #e2e8f0}
   .pdf-trait-head h2{margin:0!important;font-size:9.6pt!important;line-height:1!important;color:#132238}
   .pdf-score{display:flex;align-items:baseline;gap:1.2mm}
@@ -81,7 +106,6 @@ button:disabled{opacity:.55;cursor:wait}
   .pdf-high-low h3{margin:0 0 .7mm!important;padding:.6mm 1mm;background:#eef2f7;border-radius:1mm;font-size:6.9pt!important;line-height:1.15!important;color:#132238}
   .pdf-high-low p{margin:.5mm 0!important;font-size:6.05pt!important;line-height:1.34!important;color:#263549}
   .pdf-high-low b{color:#132238}
-  .pdf-trait-card:last-child{padding-top:2mm;padding-bottom:2mm}
   .pdf-trait-card:last-child .pdf-summary{font-size:6.8pt!important;margin-bottom:.7mm!important}
   .pdf-trait-card:last-child .pdf-current{font-size:6.25pt!important;margin-bottom:.8mm!important}
   .pdf-trait-card:last-child .pdf-high-low p{font-size:6.2pt!important}
