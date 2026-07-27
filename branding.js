@@ -1,7 +1,7 @@
 const PERSONA_CORE_NAME='Persona Core';
 const PERSONA_CORE_SUBTITLE='あなたの設計診断';
-const PERSONA_CORE_LOGO_URL='assets/kodama-corporation-logo.jpg';
-const PERSONA_CORE_MARK_URL='assets/kodama-logo-mark.jpg';
+const PERSONA_CORE_LOGO_URL='https://raw.githubusercontent.com/hidepppp-sudo/kodama-strength-diagnosis/main/assets/kodama-corporation-logo.jpg?v=20260728-4';
+const PERSONA_CORE_MARK_URL='https://raw.githubusercontent.com/hidepppp-sudo/kodama-strength-diagnosis/main/assets/kodama-logo-mark.jpg?v=20260728-4';
 let personaBrandingBusy=false;
 
 function replaceExactText(root,from,to){
@@ -16,6 +16,19 @@ function replaceExactText(root,from,to){
   });
 }
 
+function configureBrandImage(img,src){
+  img.src=src;
+  img.alt='Kodama Corporation ロゴ';
+  img.referrerPolicy='no-referrer';
+  img.decoding='async';
+  img.onerror=()=>{
+    img.onerror=null;
+    img.removeAttribute('src');
+    img.classList.add('persona-logo-fallback');
+    img.alt='KC';
+  };
+}
+
 function applyPersonaBranding(){
   if(personaBrandingBusy)return;
   personaBrandingBusy=true;
@@ -28,7 +41,8 @@ function applyPersonaBranding(){
       const left=header.firstElementChild;
       if(left&&!left.classList.contains('persona-site-brand')){
         left.className='persona-site-brand';
-        left.innerHTML=`<img class="persona-header-logo" src="${PERSONA_CORE_MARK_URL}" alt="Kodama Corporation ロゴ"><div><div class="brand">${PERSONA_CORE_NAME}</div><div class="service">${PERSONA_CORE_SUBTITLE}</div></div>`;
+        left.innerHTML='<img class="persona-header-logo"><div><div class="brand">Persona Core</div><div class="service">あなたの設計診断</div></div>';
+        configureBrandImage(left.querySelector('.persona-header-logo'),PERSONA_CORE_MARK_URL);
       }
     }
     replaceExactText(document.body,'強み・商品設計診断',PERSONA_CORE_NAME);
@@ -36,8 +50,7 @@ function applyPersonaBranding(){
       if(!hero.querySelector('.persona-hero-logo')){
         const img=document.createElement('img');
         img.className='persona-hero-logo';
-        img.src=PERSONA_CORE_LOGO_URL;
-        img.alt='Kodama Corporation ロゴ';
+        configureBrandImage(img,PERSONA_CORE_LOGO_URL);
         hero.insertBefore(img,hero.firstChild);
       }
       const h1=hero.querySelector('h1');
