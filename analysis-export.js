@@ -1,21 +1,58 @@
 const renderResultBeforeAnalysisExport=renderResult;
+const showDetailBeforeAnalysisExport=typeof showDetail==='function'?showDetail:null;
+
+const currentQuestionMap=Object.fromEntries(currentQs);
+
+function bigFiveAnswerLines(assessment){
+  return questions.map((question,index)=>{
+    const [trait,direction,text]=question;
+    const value=assessment.bigfive&&assessment.bigfive[index];
+    const label=Number.isInteger(value)?labels[value-1]:'未回答';
+    const scoring=direction===-1?'逆転項目':'通常項目';
+    return `${index+1}. [${traits[trait]}／${scoring}] ${text}\n回答：${value??'未回答'}（${label}）`;
+  }).join('\n\n');
+}
+
+function profileLines(assessment){
+  const profile=assessment.profile||{};
+  const fields=[
+    ['氏名',profile.name],['ふりがな',profile.kana],['活動区分',profile.type],
+    ['会社名・屋号',profile.company],['事業内容',profile.business],['役職',profile.role],
+    ['連絡先・表示名',profile.contact]
+  ];
+  return fields.map(([label,value])=>`${label}：${value||'未入力'}`).join('\n');
+}
+
+function currentAnswerLines(assessment){
+  const current=assessment.current||{};
+  const regular=currentQs.map(([key,question])=>`【${question}】\n${current[key]||'未入力'}`);
+  const numbers=[
+    ['現在の月商・年商',current.sales],['目標月商',current.target],
+    ['現在の商品単価',current.price],['月に使える時間',current.time]
+  ].map(([label,value])=>`【${label}】\n${value||'未入力'}`);
+  return [...regular,...numbers].join('\n\n');
+}
 
 function analysisExportText(assessment){
   const result=score(assessment).pct;
   const assetLines=assetQs.map(([key,question])=>{
     const item=assessment.assets&&assessment.assets[key]||{};
-    return `【${question}】\n選択：${item.kind||'未選択'}\n回答：${item.text||'未入力'}`;
+    return `【${question}】\n回答状況：${item.kind||'未選択'}\n本人回答：${item.text||'未入力'}`;
   }).join('\n\n');
-  const currentEntries=Object.entries(assessment.current||{}).filter(([,value])=>String(value||'').trim());
+  const completedDate=assessment.completedAt?new Date(assessment.completedAt).toLocaleString('ja-JP'):'未完了';
   return [
-    '【株式会社Kodama Corporation｜強み・商品設計診断 分析用データ】',
-    `氏名：${assessment.profile&&assessment.profile.name||''}`,
-    `活動区分：${assessment.profile&&assessment.profile.type||''}`,
-    `会社名・屋号：${assessment.profile&&assessment.profile.company||''}`,
-    `事業内容：${assessment.profile&&assessment.profile.business||''}`,
+    '【Persona Core｜あなたの設計診断　全回答データ】',
+    '開発・運営：株式会社Kodama Corporation',
+    `回答完了日時：${completedDate}`,
+    '',
+    '【基本情報】',
+    profileLines(assessment),
     '',
     '【BIG5得点】',
     Object.keys(traits).map(key=>`${traits[key]}：${result[key]}`).join('\n'),
+    '',
+    '【BIG5 50問の本人回答】',
+    bigFiveAnswerLines(assessment),
     '',
     '【20答法】',
     (assessment.twenty||[]).map((value,index)=>`${index+1}. ${value||'未入力'}`).join('\n'),
@@ -24,15 +61,29 @@ function analysisExportText(assessment){
     assetLines,
     '',
     '【現在の仕事・悩み・希望】',
-    currentEntries.length?currentEntries.map(([key,value])=>`${key}：${value}`).join('\n'):'未入力',
+    currentAnswerLines(assessment),
     '',
-    '※本人回答をもとに分析してください。医学的・心理学的診断ではなく、仮説として扱ってください。'
+    '【分析時の注意】',
+    '本人回答を根拠に、人間性、長所、弱点、内面の葛藤、抱えている悩み、強みの発揮条件、消耗条件、適した役割、商品化できる能力を統合分析してください。医学的・心理学的診断ではなく、仮説として扱ってください。'
   ].join('\n');
 }
 
-async function copyAnalysisExport(button){
-  const text=analysisExportText(state.active);
+function showExportFallback(text){
+  document.querySelector('.analysis-export-dialog')?.remove();
+  const dialog=document.createElement('section');
+  dialog.className='card analysis-export-dialog';
+  dialog.innerHTML='<div class="analysis-dialog-head"><div><div class="eyebrow">AI ANALYSIS EXPORT</div><h2>全回答データ</h2></div><button id="closeAnalysisExport" class="ghost" type="button">閉じる</button></div><p class="small">下の文章を長押しして「すべて選択」→「コピー」してください。</p><textarea id="analysisExportArea" readonly></textarea>';
+  dialog.querySelector('textarea').value=text;
+  document.body.appendChild(dialog);
+  const area=dialog.querySelector('textarea');
+  area.focus();
+  area.select();
+  dialog.querySelector('#closeAnalysisExport').onclick=()=>dialog.remove();
+}
+
+async function copyAnalysisText(text,button){
   const original=button.textContent;
+  button.disabled=true;
   try{
     if(navigator.clipboard&&window.isSecureContext){
       await navigator.clipboard.writeText(text);
@@ -47,17 +98,12 @@ async function copyAnalysisExport(button){
       if(!document.execCommand('copy'))throw new Error('copy failed');
       area.remove();
     }
-    button.textContent='コピーしました';
-    setTimeout(()=>{button.textContent=original},2200);
+    button.textContent='全回答をコピーしました';
+    setTimeout(()=>{button.textContent=original;button.disabled=false},2200);
   }catch(_){
-    const dialog=document.createElement('section');
-    dialog.className='card analysis-export-dialog';
-    dialog.innerHTML='<h2>分析用データ</h2><p class="small">下の文章を長押しして「すべて選択」→「コピー」してください。</p><textarea id="analysisExportArea" readonly></textarea><div class="actions"><div></div><button id="closeAnalysisExport" type="button">閉じる</button></div>';
-    dialog.querySelector('textarea').value=text;
-    document.body.appendChild(dialog);
-    dialog.querySelector('textarea').focus();
-    dialog.querySelector('textarea').select();
-    dialog.querySelector('#closeAnalysisExport').onclick=()=>dialog.remove();
+    button.disabled=false;
+    button.textContent=original;
+    showExportFallback(text);
   }
 }
 
@@ -68,8 +114,37 @@ renderResult=function(){
   const button=document.createElement('button');
   button.type='button';
   button.id='copyAnalysisData';
-  button.className='secondary';
-  button.textContent='分析用データをコピー';
-  button.onclick=()=>copyAnalysisExport(button);
+  button.className='secondary analysis-copy-button';
+  button.textContent='全回答をコピー（AI分析用）';
+  button.onclick=()=>copyAnalysisText(analysisExportText(state.active),button);
   actions.insertBefore(button,actions.firstChild);
 };
+
+if(showDetailBeforeAnalysisExport){
+  showDetail=async function(id){
+    await showDetailBeforeAnalysisExport(id);
+    const actions=document.querySelector('#detail .detail-actions');
+    if(!actions||document.getElementById('detailCopyAnalysis'))return;
+    const button=document.createElement('button');
+    button.type='button';
+    button.id='detailCopyAnalysis';
+    button.className='analysis-copy-button';
+    button.textContent='全回答をコピー（AI分析用）';
+    button.onclick=async()=>{
+      const original=button.textContent;
+      button.disabled=true;
+      button.textContent='回答データを取得中…';
+      try{
+        const row=await cloudRpc('admin_get_assessment',{p_token:adminToken,p_id:id});
+        if(!row)throw new Error('回答データを取得できませんでした。');
+        const assessment=normalizeActive(row.response_data||blank());
+        await copyAnalysisText(analysisExportText(assessment),button);
+      }catch(error){
+        button.disabled=false;
+        button.textContent=original;
+        alert(error.message||'回答データをコピーできませんでした。');
+      }
+    };
+    actions.insertBefore(button,actions.firstChild);
+  };
+}
