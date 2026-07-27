@@ -2,6 +2,7 @@
 .button-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none;background:#e2e8f0;color:var(--ink)}
 .issued-card{border-color:#c8b06b;background:#fffdf7}
 button:disabled{opacity:.55;cursor:wait}
+.pdf-sheet{display:none}
 @media(max-width:700px){.cloud-state{margin-top:0;text-align:left}.issued-card input{font-size:12px}}
 
 .admin-hero,.detail-head,.admin-list-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
@@ -42,21 +43,46 @@ button:disabled{opacity:.55;cursor:wait}
 }
 
 @media print{
-  @page{size:A4 portrait;margin:8mm}
-  html,body{width:210mm;height:297mm;margin:0!important;padding:0!important;overflow:hidden!important;background:#fff!important}
-  .container{width:194mm!important;max-width:194mm!important;height:281mm!important;margin:0!important;padding:0!important;overflow:hidden!important}
-  #report{width:194mm!important;height:281mm!important;margin:0!important;padding:6mm!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;page-break-after:avoid!important;break-after:avoid-page!important}
-  #report .eyebrow{font-size:7.5pt!important;line-height:1.2!important}
-  #report h1{font-size:19pt!important;line-height:1.2!important;margin:1.5mm 0 1mm!important}
-  #report>p.small:first-of-type{font-size:8pt!important;margin:0 0 1.5mm!important}
-  #report .result-grid{display:grid!important;grid-template-columns:1.15fr .85fr!important;gap:5mm!important;align-items:center!important;margin:0!important}
-  #report canvas{width:100%!important;height:auto!important;max-height:104mm!important;display:block!important}
-  #report .score-list{gap:0!important}
-  #report .score-item{padding:2.1mm 0!important;border-bottom:1px solid #dbe2ea!important}
-  #report .score-item .small{font-size:7pt!important;line-height:1.25!important}
-  #report .score-num{font-size:18pt!important;line-height:1!important}
-  #report>.notice{font-size:8.5pt!important;line-height:1.45!important;margin:2.5mm 0!important;padding:2.5mm 3mm!important}
-  #report>h3,#report>h3+p{display:none!important}
-  #report>p.small:last-of-type{font-size:6.8pt!important;line-height:1.35!important;margin:2mm 0 0!important}
-  #report,.result-grid,.score-list,.notice{page-break-inside:avoid!important;break-inside:avoid-page!important}
+  @page{size:A4 portrait;margin:5mm}
+  html,body{width:210mm!important;height:297mm!important;margin:0!important;padding:0!important;background:#fff!important;overflow:hidden!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body>*:not(.pdf-sheet){display:none!important}
+  .pdf-sheet{display:grid!important;grid-template-rows:auto 69mm 1fr auto;width:200mm!important;height:287mm!important;margin:0!important;padding:4.5mm 5mm 3.5mm!important;background:#fff!important;color:#162033!important;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif!important;box-sizing:border-box!important;overflow:hidden!important;page-break-after:avoid!important;break-after:avoid-page!important}
+  .pdf-header{display:flex;align-items:flex-end;justify-content:space-between;gap:8mm;padding-bottom:2.5mm;border-bottom:1.2px solid #132238}
+  .pdf-kicker{font-size:6.7pt;font-weight:800;letter-spacing:.16em;color:#9b7a32}
+  .pdf-header h1{margin:1mm 0 0!important;font-size:16.5pt!important;line-height:1.05!important;color:#132238!important}
+  .pdf-person{text-align:right;line-height:1.25}
+  .pdf-person strong{display:block;font-size:11.5pt;color:#132238}
+  .pdf-person span{display:block;margin-top:.8mm;font-size:7pt;color:#526174}
+  .pdf-overview{display:grid;grid-template-columns:1.25fr .75fr;gap:4mm;align-items:center;padding:2.2mm 0 2.5mm;border-bottom:1px solid #cbd5e1;min-height:0}
+  .pdf-radar-wrap{height:64mm;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .pdf-radar{width:79mm!important;height:65mm!important;max-width:none!important;display:block!important}
+  .pdf-score-panel{align-self:stretch;padding:2mm 2.5mm;background:#f7f9fc;border:1px solid #dbe2ea;border-radius:2.5mm}
+  .pdf-score-panel h2{margin:0 0 1mm!important;font-size:9.5pt!important;color:#132238}
+  .pdf-score-row{display:flex;align-items:center;justify-content:space-between;padding:1mm 0;border-bottom:1px solid #dbe2ea;font-size:7.4pt}
+  .pdf-score-row:last-of-type{border-bottom:0}
+  .pdf-score-row>span{font-weight:700}
+  .pdf-score-row>div{display:flex;align-items:baseline;gap:1.5mm}
+  .pdf-score-row strong{font-size:13pt;line-height:1;color:#132238}
+  .pdf-score-row small{font-size:6.4pt;color:#64748b}
+  .pdf-score-panel>p{margin:1.5mm 0 0!important;font-size:6.25pt!important;line-height:1.35!important;color:#526174}
+  .pdf-trait-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:2.2mm;padding:2.5mm 0;min-height:0;overflow:hidden}
+  .pdf-trait-card{display:flex;flex-direction:column;min-height:0;padding:2.1mm 2.3mm;border:1px solid #d3dae5;border-radius:2.4mm;background:#fff;overflow:hidden;break-inside:avoid!important;page-break-inside:avoid!important}
+  .pdf-trait-card:last-child{grid-column:1 / -1}
+  .pdf-trait-head{display:flex;align-items:center;justify-content:space-between;gap:2mm;padding-bottom:1mm;border-bottom:1px solid #e2e8f0}
+  .pdf-trait-head h2{margin:0!important;font-size:9.3pt!important;line-height:1!important;color:#132238}
+  .pdf-score{display:flex;align-items:baseline;gap:1.2mm}
+  .pdf-score strong{font-size:13pt;line-height:1;color:#132238}
+  .pdf-score span{font-size:6.2pt;font-weight:700;color:#9b7a32}
+  .pdf-summary{margin:1.1mm 0!important;font-size:6.35pt!important;line-height:1.35!important;color:#344256}
+  .pdf-high-low{display:grid;grid-template-columns:1fr 1fr;gap:2mm;min-height:0}
+  .pdf-high-low section{min-width:0}
+  .pdf-high-low h3{margin:0 0 .7mm!important;padding:.55mm 1mm;background:#eef2f7;border-radius:1mm;font-size:6.7pt!important;line-height:1.15!important;color:#132238}
+  .pdf-high-low p{margin:.45mm 0!important;font-size:5.8pt!important;line-height:1.32!important;color:#263549}
+  .pdf-high-low b{color:#132238}
+  .pdf-trait-card:last-child .pdf-summary{font-size:6.45pt!important}
+  .pdf-trait-card:last-child .pdf-high-low p{font-size:6pt!important}
+  .pdf-footer{display:flex;align-items:flex-end;justify-content:space-between;gap:5mm;padding-top:1.6mm;border-top:1px solid #cbd5e1;font-size:5.6pt;line-height:1.3;color:#64748b}
+  .pdf-footer span{max-width:137mm}
+  .pdf-footer strong{white-space:nowrap;color:#344256}
+  .pdf-sheet,.pdf-header,.pdf-overview,.pdf-trait-grid,.pdf-trait-card,.pdf-footer{break-inside:avoid!important;page-break-inside:avoid!important}
 }
