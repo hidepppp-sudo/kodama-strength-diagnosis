@@ -44,12 +44,19 @@ function pdfBand(scoreValue){
   return'中間';
 }
 
+function pdfBandInterpretation(scoreValue){
+  if(scoreValue>=70)return`今回の${scoreValue}点は高めです。高い側の特徴が自然に表れやすいため、強みとして活かす場面と、過剰に出たときの注意点を確認してください。`;
+  if(scoreValue<=30)return`今回の${scoreValue}点は低めです。低い側にも固有の強みがあります。無理に高く見せず、必要な場面だけ仕組みや役割分担で補うことが重要です。`;
+  return`今回の${scoreValue}点は中間域です。状況・相手・役割に応じて、高い側と低い側の特徴を使い分けやすい可能性があります。`;
+}
+
 function pdfTraitCard(key,pct){
   const guide=pdfTraitGuides[key];
   const value=pct[key];
   return `<article class="pdf-trait-card pdf-trait-${key}">
     <div class="pdf-trait-head"><h2>${esc(traits[key])}</h2><div class="pdf-score"><strong>${value}</strong><span>${pdfBand(value)}</span></div></div>
     <p class="pdf-summary">${esc(guide.summary)}</p>
+    <p class="pdf-current"><b>今回の見方：</b>${esc(pdfBandInterpretation(value))}</p>
     <div class="pdf-high-low">
       <section><h3>高い場合</h3><p><b>強み：</b>${esc(guide.highGood)}</p><p><b>注意：</b>${esc(guide.highRisk)}</p></section>
       <section><h3>低い場合</h3><p><b>強み：</b>${esc(guide.lowGood)}</p><p><b>注意：</b>${esc(guide.lowRisk)}</p></section>
