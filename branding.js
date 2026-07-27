@@ -10,8 +10,9 @@ function replaceExactText(root,from,to){
   while(walker.nextNode())nodes.push(walker.currentNode);
   nodes.forEach(node=>{
     const value=node.nodeValue;
-    if(!value)return;
-    node.nodeValue=value.replaceAll(from,to);
+    if(!value||!value.includes(from))return;
+    const next=value.replaceAll(from,to);
+    if(next!==value)node.nodeValue=next;
   });
 }
 
@@ -19,7 +20,9 @@ function applyPersonaBranding(){
   if(personaBrandingBusy)return;
   personaBrandingBusy=true;
   try{
-    document.title=document.title.replace('強み・商品設計診断',`${PERSONA_CORE_NAME}｜${PERSONA_CORE_SUBTITLE}`);
+    if(document.title.includes('強み・商品設計診断')){
+      document.title=document.title.replace('強み・商品設計診断',`${PERSONA_CORE_NAME}｜${PERSONA_CORE_SUBTITLE}`);
+    }
     const header=document.querySelector('.site-header');
     if(header){
       const left=header.firstElementChild;
@@ -30,7 +33,7 @@ function applyPersonaBranding(){
     }
     replaceExactText(document.body,'強み・商品設計診断',PERSONA_CORE_NAME);
     document.querySelectorAll('#app .hero').forEach(hero=>{
-      if(!hero.querySelector('.persona-hero-logo')&&PERSONA_CORE_LOGO_URL){
+      if(!hero.querySelector('.persona-hero-logo')){
         const img=document.createElement('img');
         img.className='persona-hero-logo';
         img.src=PERSONA_CORE_LOGO_URL;
