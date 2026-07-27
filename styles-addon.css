@@ -40,3 +40,23 @@ button:disabled{opacity:.55;cursor:wait}
   .url-box{display:block}
   .url-box input,.url-box button{width:100%;margin-top:8px}
 }
+
+@media print{
+  @page{size:A4 portrait;margin:8mm}
+  html,body{width:210mm;height:297mm;margin:0!important;padding:0!important;overflow:hidden!important;background:#fff!important}
+  .container{width:194mm!important;max-width:194mm!important;height:281mm!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  #report{width:194mm!important;height:281mm!important;margin:0!important;padding:6mm!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;page-break-after:avoid!important;break-after:avoid-page!important}
+  #report .eyebrow{font-size:7.5pt!important;line-height:1.2!important}
+  #report h1{font-size:19pt!important;line-height:1.2!important;margin:1.5mm 0 1mm!important}
+  #report>p.small:first-of-type{font-size:8pt!important;margin:0 0 1.5mm!important}
+  #report .result-grid{display:grid!important;grid-template-columns:1.15fr .85fr!important;gap:5mm!important;align-items:center!important;margin:0!important}
+  #report canvas{width:100%!important;height:auto!important;max-height:104mm!important;display:block!important}
+  #report .score-list{gap:0!important}
+  #report .score-item{padding:2.1mm 0!important;border-bottom:1px solid #dbe2ea!important}
+  #report .score-item .small{font-size:7pt!important;line-height:1.25!important}
+  #report .score-num{font-size:18pt!important;line-height:1!important}
+  #report>.notice{font-size:8.5pt!important;line-height:1.45!important;margin:2.5mm 0!important;padding:2.5mm 3mm!important}
+  #report>h3,#report>h3+p{display:none!important}
+  #report>p.small:last-of-type{font-size:6.8pt!important;line-height:1.35!important;margin:2mm 0 0!important}
+  #report,.result-grid,.score-list,.notice{page-break-inside:avoid!important;break-inside:avoid-page!important}
+}
