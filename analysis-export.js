@@ -1,8 +1,6 @@
 const renderResultBeforeAnalysisExport=renderResult;
 const showDetailBeforeAnalysisExport=typeof showDetail==='function'?showDetail:null;
 
-const currentQuestionMap=Object.fromEntries(currentQs);
-
 function bigFiveAnswerLines(assessment){
   return questions.map((question,index)=>{
     const [trait,direction,text]=question;
@@ -34,7 +32,8 @@ function currentAnswerLines(assessment){
 }
 
 function analysisExportText(assessment){
-  const result=score(assessment).pct;
+  const bigFiveComplete=Array.isArray(assessment.bigfive)&&assessment.bigfive.length===50&&assessment.bigfive.every(Number.isInteger);
+  const result=bigFiveComplete?score(assessment).pct:null;
   const assetLines=assetQs.map(([key,question])=>{
     const item=assessment.assets&&assessment.assets[key]||{};
     return `【${question}】\n回答状況：${item.kind||'未選択'}\n本人回答：${item.text||'未入力'}`;
@@ -49,7 +48,7 @@ function analysisExportText(assessment){
     profileLines(assessment),
     '',
     '【BIG5得点】',
-    Object.keys(traits).map(key=>`${traits[key]}：${result[key]}`).join('\n'),
+    result?Object.keys(traits).map(key=>`${traits[key]}：${result[key]}`).join('\n'):'未完了のため得点は未確定',
     '',
     '【BIG5 50問の本人回答】',
     bigFiveAnswerLines(assessment),
@@ -138,6 +137,8 @@ if(showDetailBeforeAnalysisExport){
         const row=await cloudRpc('admin_get_assessment',{p_token:adminToken,p_id:id});
         if(!row)throw new Error('回答データを取得できませんでした。');
         const assessment=normalizeActive(row.response_data||blank());
+        button.disabled=false;
+        button.textContent=original;
         await copyAnalysisText(analysisExportText(assessment),button);
       }catch(error){
         button.disabled=false;
