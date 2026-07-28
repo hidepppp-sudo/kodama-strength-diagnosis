@@ -1,13 +1,11 @@
 const showDetailBeforeAnalysisExport=typeof showDetail==='function'?showDetail:null;
 
 function bigFiveAnswerLines(assessment){
-  return questions.map((question,index)=>{
-    const [trait,direction,text]=question;
-    const value=assessment.bigfive&&assessment.bigfive[index];
-    const label=Number.isInteger(value)?labels[value-1]:'未回答';
-    const scoring=direction===-1?'逆転項目':'通常項目';
-    return `${index+1}. [${traits[trait]}／${scoring}] ${text}\n回答：${value??'未回答'}（${label}）`;
-  }).join('\n\n');
+  const answers=Array.isArray(assessment.bigfive)?assessment.bigfive:[];
+  return Array.from({length:50},(_,index)=>{
+    const value=answers[index];
+    return `${index+1}:${Number.isInteger(value)?value:'-'}`;
+  }).join(' ');
 }
 
 function aiContextLines(assessment){
@@ -60,7 +58,8 @@ function analysisExportText(assessment){
     '【BIG5得点】',
     result?Object.keys(traits).map(key=>`${traits[key]}：${result[key]}`).join('\n'):'未完了のため得点は未確定',
     '',
-    '【BIG5 50問の本人回答】',
+    '【BIG5 回答番号（設問番号:回答番号）】',
+    '回答番号：1=まったく当てはまらない／2=あまり当てはまらない／3=どちらともいえない／4=やや当てはまる／5=とても当てはまる',
     bigFiveAnswerLines(assessment),
     '',
     '【20答法】',
