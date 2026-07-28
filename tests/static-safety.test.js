@@ -11,6 +11,7 @@ const indexHtml = read('index.html');
 const analysisExport = read('analysis-export.js');
 const branding = read('branding.js');
 const pdfReport = read('pdf-report.js');
+const appResults = read('app-results.js');
 
 assert.ok(
   appCore.includes('if(adminEntryButton)adminEntryButton.onclick'),
@@ -52,9 +53,26 @@ assert.ok(
   'site and PDF logos must use same-origin assets'
 );
 assert.ok(
-  indexHtml.includes('analysis-export.js?v=20260728-2') &&
-  adminHtml.includes('analysis-export.js?v=20260728-2'),
+  indexHtml.includes('analysis-export.js?v=20260728-3') &&
+  adminHtml.includes('analysis-export.js?v=20260728-3'),
   'customer and admin pages must load the stabilized cache version'
+);
+assert.ok(
+  !appResults.includes('window.print()') &&
+  appResults.includes('PDFを保存') &&
+  pdfReport.includes('/Count 1'),
+  'PDF save must create a real single-page PDF instead of opening print preview'
+);
+assert.ok(
+  appResults.includes("navigator.canShare({files:[file]})") &&
+  appResults.includes("canvasToBlob(c,'image/png')"),
+  'image save must use a file Blob and the iPhone share sheet when available'
+);
+assert.ok(
+  analysisExport.includes('【BIG5 回答番号（設問番号:回答番号）】') &&
+  analysisExport.includes("return `${index+1}:${Number.isInteger(value)?value:'-'}`") &&
+  !analysisExport.includes('const [trait,direction,text]=question'),
+  'AI copy must contain compact numbered Big Five answers without question text'
 );
 
 console.log('Static safety: admin startup, AI privacy boundary, and same-origin branding verified.');
