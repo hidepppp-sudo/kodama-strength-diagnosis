@@ -239,8 +239,8 @@ async function showDetail(id){
         <div><b>会社・屋号</b><p>${esc(client.profile.company||'—')}</p></div>
         <div><b>事業内容</b><p>${esc(client.profile.business||'—')}</p></div>
       </div>
-      ${completed?`<h3>大枠サマリー</h3><div class="notice">${esc(summary.summary)}</div>
-        <p><b>商品化の現在地：</b>${esc(summary.stage)}</p>
+      ${completed?`<h3>面談前の簡易整理（AI分析ではありません）</h3><div class="notice"><b>面談仮説：</b>${esc(summary.summary)}</div>
+        <p><b>商品化の現在地（暫定）：</b>${esc(summary.stage)}</p>
         <h3>Big Five</h3><p>${Object.keys(pct).map(k=>`${traits[k]} ${pct[k]}`).join(' ／ ')}</p>
         <h3>20答法・自己認識</h3><ol>${client.twenty.filter(Boolean).map(v=>`<li>${esc(v)}</li>`).join('')}</ol>
         <h3>経験・実績の素材</h3>${assetQs.map(([k,q])=>`<details><summary>${esc(q)}</summary><p>${esc(client.assets[k]?.text||'未入力')}</p></details>`).join('')}
@@ -272,3 +272,4 @@ async function showDetail(id){
   }
 }
 initApp();
+
