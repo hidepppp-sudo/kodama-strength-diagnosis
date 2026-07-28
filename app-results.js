@@ -1,7 +1,41 @@
 function score(s){const raw={E:0,A:0,C:0,S:0,I:0};questions.forEach((q,i)=>raw[q[0]]+=q[1]===1?s.bigfive[i]:6-s.bigfive[i]);const pct={};Object.keys(raw).forEach(k=>pct[k]=Math.round((raw[k]-10)/40*100));return{raw,pct}}
 function radar(canvas,pct){const ctx=canvas.getContext('2d'),dpr=devicePixelRatio||1,w=520,h=430;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width='100%';ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);const cx=w/2,cy=h/2+10,R=145,keys=['E','A','C','S','I'];ctx.font='14px sans-serif';ctx.textAlign='center';for(let ring=1;ring<=5;ring++){ctx.beginPath();keys.forEach((k,i)=>{const a=-Math.PI/2+i*2*Math.PI/5,r=R*ring/5,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.closePath();ctx.strokeStyle='#dbe2ea';ctx.stroke()}keys.forEach((k,i)=>{const a=-Math.PI/2+i*2*Math.PI/5,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.strokeStyle='#e2e8f0';ctx.stroke();const lx=cx+Math.cos(a)*(R+45),ly=cy+Math.sin(a)*(R+30);ctx.fillStyle='#1e293b';ctx.fillText(traits[k],lx,ly);ctx.fillStyle='#132238';ctx.font='bold 15px sans-serif';ctx.fillText(String(pct[k]),lx,ly+18);ctx.font='14px sans-serif'});ctx.beginPath();keys.forEach((k,i)=>{const a=-Math.PI/2+i*2*Math.PI/5,r=R*pct[k]/100,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.closePath();ctx.fillStyle='rgba(19,34,56,.16)';ctx.fill();ctx.strokeStyle='#132238';ctx.lineWidth=3;ctx.stroke()}
-function renderResult(){const s=state.active,{pct}=score(s);app.innerHTML=`<section id="report" class="card"><div class="eyebrow">BIG FIVE RESULT</div><h1>${esc(s.profile.name)}さんの性格傾向</h1><p class="small">診断日：${new Date(s.completedAt).toLocaleDateString('ja-JP')}</p><div class="result-grid"><canvas id="radar"></canvas><div class="score-list">${Object.keys(traits).map(k=>`<div class="score-item"><div><b>${traits[k]}</b><div class="small">回答範囲を0〜100に換算</div></div><div class="score-num">${pct[k]}</div></div>`).join('')}</div></div><div class="notice">この数値は偏差値や他者との順位ではありません。高い・低いは優劣を意味せず、傾向の表れ方を示します。</div>${Object.keys(traits).map(k=>`<h3>${traits[k]} <span class="pill">${pct[k]}</span></h3><p>${desc[k]}</p>`).join('')}<div class="notice"><b>次の段階</b><br>自己認識と経験・実績を掛け合わせた強みや商品設計の検討は、小玉英明との面談で行います。</div><p class="small">本結果は医学的・心理学的診断ではありません。50項目はGoldbergのBig-Five factor markersを表現するIPIP項目を基礎としています。日本語表現は本MVP用の暫定訳です。</p><div class="actions no-print"><button class="secondary" id="png">画像保存</button><div class="right"><button class="secondary" id="print">PDF・印刷</button></div></div></section>`;radar(document.getElementById('radar'),pct);document.getElementById('print').onclick=()=>window.print();document.getElementById('png').onclick=()=>downloadImage(pct)}
-function downloadImage(pct){const c=document.createElement('canvas');c.width=1080;c.height=1500;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#132238';x.font='700 44px sans-serif';x.fillText('強み・商品設計診断',70,90);x.font='28px sans-serif';x.fillText('Big Five 性格傾向',70,140);const rc=document.createElement('canvas');radar(rc,pct);x.drawImage(rc,120,210,840,695);x.font='700 30px sans-serif';Object.keys(traits).forEach((k,i)=>x.fillText(`${traits[k]}  ${pct[k]}`,110,970+i*72));x.font='22px sans-serif';x.fillStyle='#64748b';x.fillText('高い・低いは優劣を意味しません。',70,1370);x.fillText('開発・運営：株式会社Kodama Corporation',70,1420);const a=document.createElement('a');a.download='bigfive-result.png';a.href=c.toDataURL('image/png');a.click()}
+function renderResult(){const s=state.active,{pct}=score(s);app.innerHTML=`<section id="report" class="card"><div class="eyebrow">BIG FIVE RESULT</div><h1>${esc(s.profile.name)}さんの性格傾向</h1><p class="small">診断日：${new Date(s.completedAt).toLocaleDateString('ja-JP')}</p><div class="result-grid"><canvas id="radar"></canvas><div class="score-list">${Object.keys(traits).map(k=>`<div class="score-item"><div><b>${traits[k]}</b><div class="small">回答範囲を0〜100に換算</div></div><div class="score-num">${pct[k]}</div></div>`).join('')}</div></div><div class="notice">この数値は偏差値や他者との順位ではありません。高い・低いは優劣を意味せず、傾向の表れ方を示します。</div>${Object.keys(traits).map(k=>`<h3>${traits[k]} <span class="pill">${pct[k]}</span></h3><p>${desc[k]}</p>`).join('')}<div class="notice"><b>次の段階</b><br>自己認識と経験・実績を掛け合わせた強みや商品設計の検討は、小玉英明との面談で行います。</div><p class="small">本結果は医学的・心理学的診断ではありません。50項目はGoldbergのBig-Five factor markersを表現するIPIP項目を基礎としています。日本語表現は本MVP用の暫定訳です。</p><div class="actions no-print"><button class="secondary" id="png">画像を保存</button><div class="right"><button class="secondary" id="print">PDFを保存</button></div></div></section>`;radar(document.getElementById('radar'),pct);document.getElementById('print').onclick=()=>downloadPdfResult(s,pct);document.getElementById('png').onclick=()=>downloadImage(pct)}
+function canvasToBlob(canvas,type,quality){
+  const dataUrl=canvas.toDataURL(type,quality),binary=atob(dataUrl.split(',')[1]),bytes=new Uint8Array(binary.length);
+  for(let index=0;index<binary.length;index++)bytes[index]=binary.charCodeAt(index);
+  return new Blob([bytes],{type});
+}
+function isAppleMobile(){return/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}
+async function saveGeneratedFile(blob,filename,title){
+  const file=new File([blob],filename,{type:blob.type});
+  if(isAppleMobile()&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title});return true}catch(error){if(error&&error.name==='AbortError')return false}
+  }
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download=filename;link.rel='noopener';link.style.display='none';
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+  return true;
+}
+async function runSaveButton(button,workingText,saveAction){
+  const original=button.textContent;button.disabled=true;button.textContent=workingText;
+  try{const saved=await saveAction();button.textContent=saved===false?'保存を中止しました':'保存を開始しました'}
+  catch(error){console.error(error);button.textContent='保存できませんでした';alert('保存できませんでした。通信状態を確認して、もう一度お試しください。')}
+  finally{setTimeout(()=>{button.disabled=false;button.textContent=original},1800)}
+}
+async function downloadImage(pct){
+  const button=document.getElementById('png');
+  return runSaveButton(button,'画像を作成中…',()=>{
+    const c=document.createElement('canvas');c.width=1080;c.height=1500;const x=c.getContext('2d');
+    x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#132238';x.font='700 44px sans-serif';x.fillText('Persona Core｜あなたの設計診断',70,90);x.font='28px sans-serif';x.fillText('Big Five 性格傾向',70,140);
+    const rc=document.createElement('canvas');radar(rc,pct);x.drawImage(rc,120,210,840,695);
+    x.font='700 30px sans-serif';Object.keys(traits).forEach((k,i)=>x.fillText(`${traits[k]}  ${pct[k]}`,110,970+i*72));
+    x.font='22px sans-serif';x.fillStyle='#64748b';x.fillText('高い・低いは優劣を意味しません。',70,1370);x.fillText('開発・運営：株式会社Kodama Corporation',70,1420);
+    const blob=canvasToBlob(c,'image/png');
+    return saveGeneratedFile(blob,'persona-core-bigfive.png','Persona Core 性格傾向');
+  });
+}
 
 function adminLogin(){
   if(location.pathname.endsWith('/admin.html')){location.hash='admin';render();return}
