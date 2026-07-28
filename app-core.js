@@ -34,6 +34,7 @@ function saveLocal(){
   }catch(e){console.warn('端末内保存を利用できません。',e)}
 }
 function save(){
+  state.active.updatedAt=new Date().toISOString();
   saveLocal();
   if(!customerToken||!cloudLoaded||state.active.submitted)return;
   clearTimeout(cloudSaveTimer);
@@ -58,13 +59,21 @@ function el(tag,attrs={},html=''){const x=document.createElement(tag);Object.ass
 
 async function initApp(){
   window.addEventListener('hashchange',render);
+  window.addEventListener('online',()=>{
+    if(customerToken&&cloudLoaded&&!state.active.submitted)save();
+  });
   if(location.hash==='#admin')return render();
   if(!customerToken)return renderLinkRequired();
   app.innerHTML='<section class="card hero"><div class="eyebrow">SECURE CONNECTION</div><h1>診断データを読み込んでいます</h1><p>専用URLを確認しています。</p></section>';
   try{
     const remote=await cloudRpc('get_assessment',{p_access_token:customerToken});
     if(!remote)return renderInvalidLink();
-    const payload=normalizeActive(remote.response_data||blank());
+    const localDraft=normalizeActive(state.active);
+    const remotePayload=normalizeActive(remote.response_data||blank());
+    const localUpdatedAt=Date.parse(localDraft.updatedAt||'')||0;
+    const remoteUpdatedAt=Date.parse(remotePayload.updatedAt||'')||0;
+    const useLocalDraft=remote.status!=='completed'&&!localDraft.submitted&&localUpdatedAt>remoteUpdatedAt;
+    const payload=useLocalDraft?localDraft:remotePayload;
     payload.cloudId=remote.id;
     payload.clientNumber=remote.client_number;
     payload.submitted=remote.status==='completed';
@@ -74,6 +83,7 @@ async function initApp(){
     cloudLoaded=true;
     saveLocal();
     render();
+    if(useLocalDraft)save();
   }catch(e){
     app.innerHTML=`<section class="card"><h1>通信を確認してください</h1><p>診断データを読み込めませんでした。通信環境を確認して再読み込みしてください。</p><p class="small">${esc(e.message)}</p><button onclick="location.reload()">再読み込み</button></section>`;
   }
