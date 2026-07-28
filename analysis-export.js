@@ -1,4 +1,3 @@
-const renderResultBeforeAnalysisExport=renderResult;
 const showDetailBeforeAnalysisExport=typeof showDetail==='function'?showDetail:null;
 
 function bigFiveAnswerLines(assessment){
@@ -11,14 +10,24 @@ function bigFiveAnswerLines(assessment){
   }).join('\n\n');
 }
 
-function profileLines(assessment){
+function aiContextLines(assessment){
   const profile=assessment.profile||{};
   const fields=[
-    ['氏名',profile.name],['ふりがな',profile.kana],['活動区分',profile.type],
-    ['会社名・屋号',profile.company],['事業内容',profile.business],['役職',profile.role],
-    ['連絡先・表示名',profile.contact]
+    ['活動区分',profile.type],['事業内容',profile.business],['役職',profile.role]
   ];
   return fields.map(([label,value])=>`${label}：${value||'未入力'}`).join('\n');
+}
+
+function redactDirectIdentifiers(text,assessment){
+  const profile=assessment.profile||{};
+  const identifiers=[profile.name,profile.kana,profile.company,profile.contact]
+    .map(value=>String(value||'').trim())
+    .filter(value=>value.length>=2)
+    .sort((a,b)=>b.length-a.length);
+  return identifiers.reduce(
+    (output,value)=>output.split(value).join('[直接識別情報を除外]'),
+    text
+  );
 }
 
 function currentAnswerLines(assessment){
@@ -39,13 +48,14 @@ function analysisExportText(assessment){
     return `【${question}】\n回答状況：${item.kind||'未選択'}\n本人回答：${item.text||'未入力'}`;
   }).join('\n\n');
   const completedDate=assessment.completedAt?new Date(assessment.completedAt).toLocaleString('ja-JP'):'未完了';
-  return [
-    '【Persona Core｜あなたの設計診断　全回答データ】',
+  const exportText=[
+    '【Persona Core｜あなたの設計診断　匿名化回答データ】',
     '開発・運営：株式会社Kodama Corporation',
     `回答完了日時：${completedDate}`,
+    '氏名・ふりがな・会社名・連絡先はAIへ渡さないため除外しています。',
     '',
-    '【基本情報】',
-    profileLines(assessment),
+    '【匿名化した基本情報】',
+    aiContextLines(assessment),
     '',
     '【BIG5得点】',
     result?Object.keys(traits).map(key=>`${traits[key]}：${result[key]}`).join('\n'):'未完了のため得点は未確定',
@@ -62,16 +72,19 @@ function analysisExportText(assessment){
     '【現在の仕事・悩み・希望】',
     currentAnswerLines(assessment),
     '',
-    '【分析時の注意】',
-    '本人回答を根拠に、人間性、長所、弱点、内面の葛藤、抱えている悩み、強みの発揮条件、消耗条件、適した役割、商品化できる能力を統合分析してください。医学的・心理学的診断ではなく、仮説として扱ってください。'
+    '【分析ルール】',
+    '出力を「事実」「解釈」「面談仮説」の3層に明確に分けてください。事実は回答・得点・実績として確認できる内容だけ、解釈は複数回答から考えられる意味、面談仮説は面談で確認しなければ分からない内容として記述してください。',
+    '総合サマリー、強みの明確度、自己認識の安定度、経験・実績の蓄積、商品化の準備度、顧客像の明確度、提供方法の明確度、発信・営業の障壁、消耗リスク、3層の一致点、食い違い・矛盾、強みの大枠仮説（最大3件）、現在の課題仮説（最大3件）、面談で確認する質問（最大10問）を整理してください。',
+    '商品名、価格、適職、人生方針を断定しないでください。医学的・心理学的診断を行わず、本人の価値や成功可能性を決めつけないでください。'
   ].join('\n');
+  return redactDirectIdentifiers(exportText,assessment);
 }
 
 function showExportFallback(text){
   document.querySelector('.analysis-export-dialog')?.remove();
   const dialog=document.createElement('section');
   dialog.className='card analysis-export-dialog';
-  dialog.innerHTML='<div class="analysis-dialog-head"><div><div class="eyebrow">AI ANALYSIS EXPORT</div><h2>全回答データ</h2></div><button id="closeAnalysisExport" class="ghost" type="button">閉じる</button></div><p class="small">下の文章を長押しして「すべて選択」→「コピー」してください。</p><textarea id="analysisExportArea" readonly></textarea>';
+  dialog.innerHTML='<div class="analysis-dialog-head"><div><div class="eyebrow">AI ANALYSIS EXPORT</div><h2>匿名化した回答データ</h2></div><button id="closeAnalysisExport" class="ghost" type="button">閉じる</button></div><p class="small">氏名・ふりがな・会社名・連絡先は除外済みです。下の文章を長押しして「すべて選択」→「コピー」してください。</p><textarea id="analysisExportArea" readonly></textarea>';
   dialog.querySelector('textarea').value=text;
   document.body.appendChild(dialog);
   const area=dialog.querySelector('textarea');
@@ -97,7 +110,7 @@ async function copyAnalysisText(text,button){
       if(!document.execCommand('copy'))throw new Error('copy failed');
       area.remove();
     }
-    button.textContent='全回答をコピーしました';
+    button.textContent='匿名化データをコピーしました';
     setTimeout(()=>{button.textContent=original;button.disabled=false},2200);
   }catch(_){
     button.disabled=false;
@@ -105,19 +118,6 @@ async function copyAnalysisText(text,button){
     showExportFallback(text);
   }
 }
-
-renderResult=function(){
-  renderResultBeforeAnalysisExport();
-  const actions=document.querySelector('#report .actions.no-print');
-  if(!actions||document.getElementById('copyAnalysisData'))return;
-  const button=document.createElement('button');
-  button.type='button';
-  button.id='copyAnalysisData';
-  button.className='secondary analysis-copy-button';
-  button.textContent='全回答をコピー（AI分析用）';
-  button.onclick=()=>copyAnalysisText(analysisExportText(state.active),button);
-  actions.insertBefore(button,actions.firstChild);
-};
 
 if(showDetailBeforeAnalysisExport){
   showDetail=async function(id){
@@ -128,7 +128,7 @@ if(showDetailBeforeAnalysisExport){
     button.type='button';
     button.id='detailCopyAnalysis';
     button.className='analysis-copy-button';
-    button.textContent='全回答をコピー（AI分析用）';
+    button.textContent='匿名化データをコピー（AI分析用）';
     button.onclick=async()=>{
       const original=button.textContent;
       button.disabled=true;
@@ -149,3 +149,4 @@ if(showDetailBeforeAnalysisExport){
     actions.insertBefore(button,actions.firstChild);
   };
 }
+
