@@ -17,6 +17,12 @@ assert.ok(
   'admin entry binding must tolerate admin.html without #adminBtn'
 );
 assert.ok(
+  appCore.includes("window.addEventListener('online'") &&
+  appCore.includes('localUpdatedAt>remoteUpdatedAt') &&
+  appCore.includes('if(useLocalDraft)save()'),
+  'newer local drafts must survive a failed cloud save and retry after reconnect'
+);
+assert.ok(
   !adminHtml.includes('id="adminBtn"'),
   'the stability test must cover the actual admin.html structure'
 );
