@@ -52,7 +52,8 @@ function setCloudState(message,isError=false){
 }
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 const app=document.getElementById('app');
-document.getElementById('adminBtn').onclick=()=>adminLogin();
+const adminEntryButton=document.getElementById('adminBtn');
+if(adminEntryButton)adminEntryButton.onclick=()=>adminLogin();
 function el(tag,attrs={},html=''){const x=document.createElement(tag);Object.assign(x,attrs);x.innerHTML=html;return x}
 
 async function initApp(){
@@ -126,3 +127,4 @@ function bigPage(page){
   questions.slice(start,start+10).forEach((q,idx)=>{const i=start+idx,d=el('div',{className:'question'},`<div class="qtext">${i+1}. ${esc(q[2])}</div><div class="scale">${labels.map((l,v)=>`<label><input type="radio" name="q${i}" value="${v+1}" ${state.active.bigfive[i]===v+1?'checked':''}>${v+1}. ${l}</label>`).join('')}</div>`);d.onchange=e=>{state.active.bigfive[i]=+e.target.value;save()};b.append(d)});
   const n=nav();n.querySelector('#next').onclick=()=>{if(state.active.bigfive.slice(start,start+10).some(v=>v===null))return alert('10問すべてに回答してください。');state.active.step++;save();render()};b.append(n);shell('Big Five性格傾向チェック',b)
 }
+
