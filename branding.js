@@ -1,7 +1,7 @@
 const PERSONA_CORE_NAME='Persona Core';
 const PERSONA_CORE_SUBTITLE='あなたの設計診断';
-const PERSONA_CORE_LOGO_URL='https://raw.githubusercontent.com/hidepppp-sudo/kodama-strength-diagnosis/main/assets/kodama-corporation-logo.jpg?v=20260728-4';
-const PERSONA_CORE_MARK_URL='https://raw.githubusercontent.com/hidepppp-sudo/kodama-strength-diagnosis/main/assets/kodama-logo-mark.jpg?v=20260728-4';
+const PERSONA_CORE_LOGO_URL='assets/kodama-corporation-logo.jpg?v=20260728-5';
+const PERSONA_CORE_MARK_URL='assets/kodama-logo-mark.jpg?v=20260728-5';
 let personaBrandingBusy=false;
 
 function replaceExactText(root,from,to){
@@ -23,9 +23,12 @@ function configureBrandImage(img,src){
   img.decoding='async';
   img.onerror=()=>{
     img.onerror=null;
-    img.removeAttribute('src');
-    img.classList.add('persona-logo-fallback');
-    img.alt='KC';
+    const fallback=document.createElement('span');
+    fallback.className=`${img.className} persona-logo-fallback`;
+    fallback.setAttribute('role','img');
+    fallback.setAttribute('aria-label','Kodama Corporation');
+    fallback.textContent='KC';
+    img.replaceWith(fallback);
   };
 }
 
@@ -73,3 +76,4 @@ const personaBrandObserver=new MutationObserver(()=>requestAnimationFrame(applyP
 personaBrandObserver.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
 window.addEventListener('DOMContentLoaded',applyPersonaBranding);
 applyPersonaBranding();
+
